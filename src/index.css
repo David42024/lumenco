@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ajustes base de la marca LUMEN & CO. */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-cream text-ink dark:bg-charcoal dark:text-sand transition-colors duration-200;
+}
+
+::selection {
+  @apply bg-gold/30;
+}
+
+/* Foco visible accesible en toda la app */
+:focus-visible {
+  outline: 2px solid #B8956A;
+  outline-offset: 2px;
+}
