@@ -35,7 +35,6 @@ async def filter_input(
     url = f"{settings.filter_api_url.rstrip('/')}/api/v1/filter"
     headers = {
         "X-Promption-API-Key": settings.promption_api_key,
-        "Authorization": f"Bearer {settings.promption_api_key}",
         "Content-Type": "application/json",
     }
     payload = {
@@ -98,7 +97,6 @@ async def guard_output(
     url = f"{settings.filter_api_url.rstrip('/')}/api/v1/output-guard"
     headers = {
         "X-Promption-API-Key": settings.promption_api_key,
-        "Authorization": f"Bearer {settings.promption_api_key}",
         "Content-Type": "application/json",
     }
     payload = {
