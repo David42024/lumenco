@@ -15,7 +15,7 @@ Flujo de seguridad:
 from datetime import datetime, timezone
 import logging
 from fastapi import APIRouter, Depends
-import google.generativeai as genai
+import httpx
 
 from app.config import settings
 from app.database import fetch_all
@@ -25,10 +25,6 @@ from app.services import promption
 
 logger = logging.getLogger("chat")
 router = APIRouter(prefix="/chat", tags=["chat"])
-
-# Configurar Gemini si la clave está presente
-if settings.gemini_api_key:
-    genai.configure(api_key=settings.gemini_api_key)
 
 
 @router.post("", response_model=ChatResponse)
@@ -82,7 +78,6 @@ async def chat(
     raw_response_text = ""
     if settings.gemini_api_key:
         try:
-            model = genai.GenerativeModel("gemini-3.1-flash-lite")
             system_prompt = (
                 "Eres LumenBot, el asistente virtual inteligente de Lumen & Co.\n"
                 f"El usuario actual tiene el rol: '{effective_role}'.\n\n"
@@ -100,8 +95,21 @@ async def chat(
             )
 
             prompt = f"{system_prompt}\n\nPregunta del usuario: {body.message}"
-            response = await model.generate_content_async(prompt)
-            raw_response_text = response.text
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={settings.gemini_api_key}"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt}
+                        ]
+                    }
+                ]
+            }
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payload, timeout=30.0)
+                response.raise_for_status()
+                data = response.json()
+                raw_response_text = data["candidates"][0]["content"]["parts"][0]["text"]
         except Exception as e:
             logger.exception(f"Error al llamar a Google Gemini: {e}")
             raw_response_text = (
